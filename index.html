@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Письма с фронта</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(135deg, #1a1410 0%, #2d2420 100%);
+            color: #e8dcc4;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: rgba(26, 20, 16, 0.95);
+            border-bottom: 3px solid #a67c52;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #f5e6d3;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #d4a574;
+            font-style: italic;
+        }
+
+        main {
+            padding: 60px 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-family: 'Cormorant Garamond', serif;
+            border: 2px solid #a67c52;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            background-color: #a67c52;
+            color: #f5e6d3;
+        }
+
+        button:hover {
+            background-color: #c9956f;
+            border-color: #c9956f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(166, 124, 82, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #a67c52;
+        }
+
+        .btn-secondary:hover {
+            background-color: #a67c52;
+            color: #f5e6d3;
+        }
+
+        .filters {
+            background-color: rgba(45, 36, 32, 0.8);
+            padding: 25px;
+            border: 2px solid #a67c52;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            max-width: 350px;
+            display: none;
+        }
+
+        .filters.active {
+            display: block;
+        }
+
+        .filters h3 {
+            color: #f5e6d3;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            color: #d4a574;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: #3a3028;
+            color: #e8dcc4;
+            border: 2px solid #a67c52;
+            border-radius: 4px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+        }
+
+        .letter-card {
+            max-width: 900px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #f5e6d3 0%, #f0dcc5 100%);
+            padding: 50px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            position: relative;
+            border: 2px solid #a67c52;
+        }
+
+        .letter-header {
+            border-bottom: 3px solid #a67c52;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .letter-header h2 {
+            font-size: 1.8rem;
+            color: #2d2420;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .letter-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #8b6f47;
+        }
+
+        .letter-text {
+            font-size: 1.1rem;
+            color: #3a3028;
+            line-height: 2;
+            margin: 30px 0;
+            font-style: italic;
+            white-space: pre-wrap;
+            text-align: justify;
+        }
+
+        .letter-footer {
+            border-top: 3px solid #a67c52;
+            padding-top: 20px;
+        }
+
+        .author-info {
+            font-size: 0.85rem;
+            color: #8b6f47;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #d4a574;
+            font-size: 1.2rem;
+            padding: 60px 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #f5e6d3 0%, #f0dcc5 100%);
+            border-radius: 8px;
+            border: 3px solid #a67c52;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-header {
+            background-color: #a67c52;
+            color: #f5e6d3;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #8b6f47;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #f5e6d3;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            transform: none;
+            background-color: transparent;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #3a3028;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: white;
+            border: 2px solid #a67c52;
+            border-radius: 4px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            color: #3a3028;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #c9956f;
+            box-shadow: 0 0 8px rgba(166, 124, 82, 0.3);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .responses-section {
+            max-width: 900px;
+            margin: 40px auto 0;
+            background-color: rgba(45, 36, 32, 0.8);
+            padding: 30px;
+            border-radius: 8px;
+            border: 2px solid #a67c52;
+            display: none;
+        }
+
+        .responses-section.active {
+            display: block;
+        }
+
+        .responses-header h3 {
+            font-size: 1.3rem;
+            color: #f5e6d3;
+            margin-bottom: 20px;
+        }
+
+        .response-item {
+            background-color: rgba(60, 48, 40, 0.8);
+            padding: 15px;
+            border-left: 4px solid #a67c52;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .response-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        .response-author {
+            color: #d4a574;
+            font-weight: 600;
+        }
+
+        .response-date {
+            color: #8b7355;
+            font-size: 0.8rem;
+        }
+
+        .response-text {
+            color: #e8dcc4;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        footer {
+            background-color: rgba(26, 20, 16, 0.95);
+            border-top: 3px solid #a67c52;
+            margin-top: 80px;
+            padding: 30px 0;
+            text-align: center;
+        }
+
+        footer p {
+            color: #d4a574;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .letter-card {
+                padding: 25px;
+            }
+
+            .letter-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .letter-text {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+                    <p>Сделал ученик 10А Ишкузин Даниил</p>
+            <h1> Письма с фронта</h1>
+            <p class="subtitle">Голоса защитников из разных эпох</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="controls">
+                <button onclick="getRandomLetter()">Читать случайное письмо</button>
+                <button class="btn-secondary" onclick="toggleFilters()">Фильтры</button>
+            </div>
+
+            <div class="filters" id="filters">
+                <h3>Поиск по фильтрам</h3>
+                <div class="filter-group">
+                    <label>Год</label>
+                    <select id="yearFilter" onchange="applyFilters()">
+                        <option value="">Любой год</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Фронт</label>
+                    <select id="frontFilter" onchange="applyFilters()">
+                        <option value="">Любой фронт</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Род войск</label>
+                    <select id="branchFilter" onchange="applyFilters()">
+                        <option value="">Любой род войск</option>
+                    </select>
+                </div>
+                <button onclick="resetFilters()" style="width: 100%; margin-top: 15px;">Сбросить фильтры</button>
+            </div>
+
+            <div id="noResults" class="no-results" style="display: none;">
+                По вашим фильтрам писем не найдено.
+            </div>
+
+            <div id="letterCard" class="letter-card" style="display: none;">
+                <div class="letter-header">
+                    <h2 id="letterAuthor"></h2>
+                    <div class="letter-meta" id="letterMeta"></div>
+                </div>
+                <div class="letter-text" id="letterText"></div>
+                <div class="letter-footer">
+                    <p class="author-info" id="letterInfo"></p>
+                    <button onclick="openResponseModal()" style="width: 100%;">Написать ответ</button>
+                </div>
+            </div>
+
+            <div id="responsesSection" class="responses-section">
+                <div class="responses-header">
+                    <h3>Ответы современников (<span id="responsesCount">0</span>)</h3>
+                </div>
+                <div id="responsesList"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="responseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Напишите ответ</h2>
+                <button class="close-btn" onclick="closeResponseModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="background-color: #e8dcc4; padding: 15px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #a67c52;">
+                    <p style="font-size: 0.85rem; color: #8b6f47; margin-bottom: 5px;">Письмо от:</p>
+                    <p style="font-size: 1.1rem; color: #2d2420; font-weight: 600;" id="modalLetterAuthor"></p>
+                    <p style="font-size: 0.8rem; color: #8b6f47; margin-top: 5px;" id="modalLetterYear"></p>
+                </div>
+                <form onsubmit="submitResponse(event)">
+                    <div class="form-group">
+                        <label>Ваше имя (не обязательно)</label>
+                        <input type="text" id="responseAuthor" placeholder="Или оставьте анонимным">
+                    </div>
+                    <div class="form-group">
+                        <label>Ваш ответ</label>
+                        <textarea id="responseText" placeholder="Напишите ваше послание в прошлое..." required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit">Отправить</button>
+                        <button type="button" class="btn-secondary" onclick="closeResponseModal()">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Вечная память защитникам Отечества</p>
+        </div>
+    </footer>
+
+    <script>
+        const letters = [
+            {
+                id: '1',
+                authorName: 'Иван Петрович Соколов',
+                authorInfo: 'Рядовой, 150-я стрелковая дивизия, 1943',
+                year: 1942,
+                front: 'Западный фронт',
+                militaryBranch: 'Пехота',
+                letterText: 'Дорогая Катюша!\n\nПишу тебе с передовой. Здесь очень холодно, но мы держимся. Немцы не пройдут, мы их остановим. Береги себя и нашу дочку Машеньку.\n\nЦелую крепко.\nТвой Ваня'
+            },
+            {
+                id: '2',
+                authorName: 'Александр Николаевич Волков',
+                authorInfo: 'Лейтенант, командир танкового взвода, Герой Советского Союза',
+                year: 1943,
+                front: 'Курская дуга',
+                militaryBranch: 'Танковые войска',
+                letterText: 'Мама!\n\nНе волнуйся за меня. Наш экипаж прошёл уже сотни километров. Танк наш подбили, но мы все живы, получили новую машину. Скоро будет большое сражение.\n\nВерю, что вернусь домой с победой.\nТвой сын'
+            },
+            {
+                id: '3',
+                authorName: 'Мария Ивановна Козлова',
+                authorInfo: 'Медсестра, 34-й медсанбат, награждена медалью',
+                year: 1944,
+                front: 'Белорусский фронт',
+                militaryBranch: 'Медицинская служба',
+                letterText: 'Милая мамочка!\n\nРаботы очень много, но я справляюсь. Сегодня спасли троих раненых бойцов. Когда вижу их улыбки, понимаю, что делаю важное дело.\n\nВойна скоро кончится, я это чувствую.\nЖди меня.\nТвоя Маша'
+            },
+            {
+                id: '4',
+                authorName: 'Сергей Дмитриевич Морозов',
+                authorInfo: 'Старший сержант, снайпер, 62-я армия',
+                year: 1942,
+                front: 'Сталинградский фронт',
+                militaryBranch: 'Пехота',
+                letterText: 'Родные мои!\n\nДержим оборону в городе. За каждый дом идут бои. Наша позиция на заводе. Немцы близко, но мы не отступим.\n\nСталинград не сдадим.\nЭто я вам обещаю.'
+            },
+            {
+                id: '5',
+                authorName: 'Пётр Васильевич Леонов',
+                authorInfo: 'Капитан, лётчик-истребитель, 16-й авиаполк',
+                year: 1943,
+                front: 'Центральный фронт',
+                militaryBranch: 'Авиация',
+                letterText: 'Любимая Лена!\n\nВчера сбил свой десятый самолёт противника. Командир представил к награде. Каждый раз, поднимаясь в небо, думаю о тебе и нашем сыне.\n\nВаши фотографии всегда со мной.\nПетя'
+            }
+        ];
+
+        let currentLetter = null;
+        let responses = [];
+        let filters = { year: '', front: '', militaryBranch: '' };
+
+        function init() {
+            responses = JSON.parse(localStorage.getItem('responses') || '[]');
+            populateFilters();
+            getRandomLetter();
+        }
+
+        function populateFilters() {
+            const years = [...new Set(letters.map(l => l.year))].sort();
+            const fronts = [...new Set(letters.map(l => l.front))].sort();
+            const branches = [...new Set(letters.map(l => l.militaryBranch))].sort();
+
+            const yearSelect = document.getElementById('yearFilter');
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            });
+
+            const frontSelect = document.getElementById('frontFilter');
+            fronts.forEach(front => {
+                const option = document.createElement('option');
+                option.value = front;
+                option.textContent = front;
+                frontSelect.appendChild(option);
+            });
+
+            const branchSelect = document.getElementById('branchFilter');
+            branches.forEach(branch => {
+                const option = document.createElement('option');
+                option.value = branch;
+                option.textContent = branch;
+                branchSelect.appendChild(option);
+            });
+        }
+
+        function getFilteredLetters() {
+            return letters.filter(letter => {
+                if (filters.year && letter.year.toString() !== filters.year) return false;
+                if (filters.front && letter.front !== filters.front) return false;
+                if (filters.militaryBranch && letter.militaryBranch !== filters.militaryBranch) return false;
+                return true;
+            });
+        }
+
+        function getRandomLetter() {
+            const filteredLetters = getFilteredLetters();
+            const available = filteredLetters.length > 0 ? filteredLetters : letters;
+
+            if (available.length === 0) {
+                document.getElementById('noResults').style.display = 'block';
+                document.getElementById('letterCard').style.display = 'none';
+                document.getElementById('responsesSection').classList.remove('active');
+                return;
+            }
+
+            document.getElementById('noResults').style.display = 'none';
+            const randomIndex = Math.floor(Math.random() * available.length);
+            currentLetter = available[randomIndex];
+            displayLetter();
+            displayResponses();
+        }
+
+        function displayLetter() {
+            document.getElementById('letterAuthor').textContent = currentLetter.authorName;
+            document.getElementById('letterText').textContent = currentLetter.letterText;
+            document.getElementById('letterInfo').textContent = currentLetter.authorInfo;
+
+            const meta = `
+                <div> ${currentLetter.year} год</div>
+                <div> ${currentLetter.front}</div>
+                <div> ${currentLetter.militaryBranch}</div>
+            `;
+            document.getElementById('letterMeta').innerHTML = meta;
+            document.getElementById('letterCard').style.display = 'block';
+        }
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
